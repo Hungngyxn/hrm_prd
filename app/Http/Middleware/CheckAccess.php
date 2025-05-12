@@ -20,20 +20,21 @@ class CheckAccess
     {
         $name = explode(".", $request->route()->getName())[0];
 
-        if(in_array($name, array('employees-data', 'departments-data', 'positions-data'))){
-            $name = "data";
-        } else if (in_array($name, array('users', 'roles'))) {
-            $name = "accounts";
-        } else if ($name == "profile") {
+        if ($name == "user") {
             $name = "user";
-        } else if ($name == "employees-leave-request") {
-            $name = "leave-request";
-        } else if ($name == "employees-performance-score") {
-            $name = "performance";
-        } else if ($name == "score-categories") {
-            $name = "score-category";
+        } else if ($name == "roles") {
+            $name = "role";
+        } else if ($name == "orders") {
+            $name = "order";
+        } else if ($name == "account") {
+            $name = "account";   
+        } else if ($name == "shops") {
+            $name = "shop";   
+        }else if ($name == "profile") {
+            $name = "account";
+        }else if ($name == "sku") {
+            $name = "sku";
         }
-
 
         $menuId = Menu::whereName($name)->first()->id;
         $accessType = Access::where([

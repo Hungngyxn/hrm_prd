@@ -14,11 +14,11 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            EmployeeSeeder::class,
-            AttendanceSeeder::class,
-            MenuSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
+            MenuSeeder::class, 
             AccessSeeder::class,
-            ScoreCategorySeeder::class, 
+            SellerHasShopSeeder::class,
         ]);
     }
 }
