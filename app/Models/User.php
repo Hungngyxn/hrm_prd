@@ -21,7 +21,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        'is_active'
     ];
 
     /**
@@ -31,7 +30,6 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
@@ -40,7 +38,6 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
     ];
 
     public function role() 
@@ -48,23 +45,26 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function employee () 
-    {
-        return $this->hasOne(Employee::class);
-    }
-
     public function paginate($count = 10) 
     {
         return $this->with('role')->latest()->paginate($count);
     }
 
-    public function getProfile() 
-    {
-        return $this->with('employee')->where('id', auth()->id())->first();
-    }
-
     public function isAdmin() 
     {
         return $this->role->isAdmin();
+    }
+
+    public function shops()
+    {
+        return $this->hasMany(SellerHasShop::class, 'user_id');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($seller) {
+            SellerHasShop::where('user_id', $seller->id)->update(['user_id' => null]);
+        });
+
     }
 }

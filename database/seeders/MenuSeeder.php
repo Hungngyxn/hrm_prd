@@ -14,7 +14,7 @@ class MenuSeeder extends Seeder
      */
     public function run()
     {
-        $menus = ['dashboard', 'data', 'performance', 'leave-request', 'attendances', 'announcements', 'recruitments', 'score-category', 'logs',  'accounts', 'user'];
+        $menus = ['dashboard', 'order','shop' , 'user','role', 'sku', 'account'];
 
         foreach($menus as $menu) {
             Menu::factory()->create(['name' => $menu]);

@@ -16,50 +16,34 @@ class RolesController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');  
-        
+        $this->middleware('auth');
+
         $this->roles = resolve(Role::class);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $roles = $this->roles->paginate();
-        return view('pages.roles', compact('roles'));
+        $roles = $this->roles->paginate(10);
+        return view('pages.role.index', compact('roles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $menus = Menu::all();
-        return view('pages.roles_create', compact('menus'));
+        return view('pages.role.create', compact('menus'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(StoreRoleRequest $request)
     {
         $roleId = Role::create(['name' => $request->input('name')])->id;
 
-        if($request->input('is_super_user') == "1") {
+        if ($request->input('is_super_user') == "1") {
             Admin::create([
                 'role_id' => $roleId
             ]);
         }
 
-        foreach($request->menuAndAccessLevel as $mna) {
+        foreach ($request->menuAndAccessLevel as $mna) {
             $key = key($mna);
             Access::create([
                 'role_id' => $roleId,
@@ -68,93 +52,50 @@ class RolesController extends Controller
             ]);
         }
 
-        Log::create([
-            'description' => auth()->user()->employee->name . " created a role named '" . $request->input('name') . "'"
-        ]);
-
-        return redirect()->route('roles')->with('status', 'Successfully created a role.');
+        return redirect()->route('roles.index')->with('status', 'Successfully created a role.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
     public function show(Role $role)
     {
         $accessesForEditing = Access::where('role_id', $role->id)->with('menu', 'role')->orderBy('menu_id', 'ASC')->get();
-        return view('pages.roles_show', compact('accessesForEditing', 'role'));
+        return view('pages.role.show', compact('accessesForEditing', 'role'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Role $role)
     {
         $accessesForEditing = Access::where('role_id', $role->id)->with('menu', 'role')->orderBy('menu_id', 'ASC')->get();
 
-        return view('pages.roles_edit', compact('accessesForEditing', 'role'));
+        return view('pages.role.edit', compact('accessesForEditing', 'role'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
     public function update(StoreRoleRequest $request, Role $role)
     {
         $role->update([
-                'name' => $request->input('name'),
-                'is_super_user' => $request->input('is_super_user'),
-            ]);
+            'name' => $request->input('name'),
+            'is_super_user' => $request->input('is_super_user'),
+        ]);
 
-        if($request->input('is_super_user') == "0") {
+        if ($request->input('is_super_user') == "0") {
             Admin::whereRoleId($role->id)->delete();
         }
 
-        foreach($request->menuAndAccessLevel as $mna) {
+        foreach ($request->menuAndAccessLevel as $mna) {
             $key = key($mna);
             Access::where([
                 ['role_id', '=', $role->id],
                 ['menu_id', '=', $key],
             ])->update([
-                'status' => $mna[$key]
-            ]);
+                        'status' => $mna[$key]
+                    ]);
         }
 
-        Log::create([
-            'description' => auth()->user()->employee->name . " updated a role's detail named '" . $role->name . "'"
-        ]);
-
-        return redirect()->route('roles')->with('status', 'Successfully updated role.');
+        return redirect()->route('roles.index')->with('status', 'Successfully updated role.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Role $role)
     {
         $this->roles->where('id', $role->id)->delete();
 
-        Log::create([
-            'description' => auth()->user()->employee->name . " deleted a role named '" . $role->name . "'"
-        ]);
-
-        return redirect()->route('roles')->with('status', 'Successfully deleted role.');
-    }
-
-    public function print ()
-    {
-        $roles = $this->roles->all();
-        return view('pages.roles_print', compact('roles'));
+        return redirect()->route('roles.index')->with('status', 'Successfully deleted role.');
     }
 }
