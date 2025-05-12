@@ -53,10 +53,6 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $user = User::where('email',$request->email)->first();
-        if( $user && !$user->is_active){
-            throw ValidationException::withMessages([$this->username() => __('User has been deactivated.')]);
-        }
-
         $request->validate([
             $this->username() => 'required|string',
             'password' => 'required|string',
